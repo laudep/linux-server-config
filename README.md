@@ -1,7 +1,21 @@
 # Linux Server Configuration Project
+### About
+This is the final project in Udacity's [Full Stack Web Developer Nanodegree](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd004).<br>
+The previously built [Item Catalog](https://github.com/laudep/ItemCatalog) web app will be hosted on a Ubuntu server running on an [Amazon Lightsail](https://aws.amazon.com/lightsail/) instance.<br>
+The server details and setup/configuration steps taken are listed below.
+
+## Server Overview
+| Attribute                	| Value                                                         	|
+|--------------------------	|---------------------------------------------------------------	|
+| **Public IP**            	| 35.156.161.50                                                 	|
+| **SSH port**             	| 2200                                                          	|
+| **Item Catalog app URL** 	| https://ec2-35-156-161-50.eu-central-1.compute.amazonaws.com/ 	|
+
+## Table of Contents
 - [Linux Server Configuration Project](#linux-server-configuration-project)
         - [About](#about)
     - [Server Overview](#server-overview)
+    - [Table of Contents](#table-of-contents)
     - [Basic server setup](#basic-server-setup)
         - [Set up new Ubuntu Server instance on Amazon Lightsail](#set-up-new-ubuntu-server-instance-on-amazon-lightsail)
         - [SSH into the server](#ssh-into-the-server)
@@ -27,17 +41,6 @@
         - [Initialize database](#initialize-database)
         - [SSL Setup](#ssl-setup)
     - [Sources](#sources)
-### About
-This is the final project in Udacity's [Full Stack Web Developer Nanodegree](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd004).<br>
-The previously built [Item Catalog](https://github.com/laudep/ItemCatalog) web app will be hosted on a Ubuntu server running on an [Amazon Lightsail](https://aws.amazon.com/lightsail/) instance.<br>
-The server details and setup/configuration steps taken are listed below.
-
-## Server Overview
-| Attribute                	| Value                                                         	|
-|--------------------------	|---------------------------------------------------------------	|
-| **Public IP**            	| 35.156.161.50                                                 	|
-| **SSH port**             	| 2200                                                          	|
-| **Item Catalog app URL** 	| https://ec2-35-156-161-50.eu-central-1.compute.amazonaws.com/ 	|
 
 ## Basic server setup
 ### Set up new Ubuntu Server instance on Amazon Lightsail
