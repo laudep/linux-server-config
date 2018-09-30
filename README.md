@@ -1,17 +1,46 @@
 # Linux Server Configuration Project
-## About
+- [Linux Server Configuration Project](#linux-server-configuration-project)
+        - [About](#about)
+    - [Server Overview](#server-overview)
+    - [Basic server setup](#basic-server-setup)
+        - [Set up new Ubuntu Server instance on Amazon Lightsail](#set-up-new-ubuntu-server-instance-on-amazon-lightsail)
+        - [SSH into the server](#ssh-into-the-server)
+        - [Update all installed packages](#update-all-installed-packages)
+        - [Configure the local timezone to UTC](#configure-the-local-timezone-to-utc)
+        - [Suggestion: create an instance snapshot](#suggestion-create-an-instance-snapshot)
+    - [Security configuration](#security-configuration)
+        - [Change the SSH port from 22 to 2200 and disable remote root login](#change-the-ssh-port-from-22-to-2200-and-disable-remote-root-login)
+        - [Firewall configuration](#firewall-configuration)
+    - [Adding a user](#adding-a-user)
+        - [Create new user **'grader'** with sudo access](#create-new-user-grader-with-sudo-access)
+        - [Set up SSH login with keys for grader user](#set-up-ssh-login-with-keys-for-grader-user)
+    - [Set up database and app dependencies](#set-up-database-and-app-dependencies)
+        - [Apache and mod_wsgi installation](#apache-and-modwsgi-installation)
+        - [PostgreSQL installation](#postgresql-installation)
+        - [PostgreSQL configuration: catalog user and database](#postgresql-configuration-catalog-user-and-database)
+        - [Set up Linux user for database access](#set-up-linux-user-for-database-access)
+        - [Git Installation and Item Catalog setup](#git-installation-and-item-catalog-setup)
+        - [Setup and enble virtual host](#setup-and-enble-virtual-host)
+        - [WSGI Configuration](#wsgi-configuration)
+        - [Disable default Apache startpage and enable the Itme Catalog](#disable-default-apache-startpage-and-enable-the-itme-catalog)
+        - [Edit the database path](#edit-the-database-path)
+        - [Initialize database](#initialize-database)
+        - [SSL Setup](#ssl-setup)
+    - [Sources](#sources)
+### About
 This is the final project in Udacity's [Full Stack Web Developer Nanodegree](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd004).<br>
-In this project, the previously built [Item Catalog](https://github.com/laudep/ItemCatalog) web app will be hosted on a Ubuntu server running on an [Amazon Lightsail](https://aws.amazon.com/lightsail/) instance.<br>
+The previously built [Item Catalog](https://github.com/laudep/ItemCatalog) web app will be hosted on a Ubuntu server running on an [Amazon Lightsail](https://aws.amazon.com/lightsail/) instance.<br>
 The server details and setup/configuration steps taken are listed below.
 
-# Server Info
+## Server Overview
 | Attribute                	| Value                                                         	|
 |--------------------------	|---------------------------------------------------------------	|
 | **Public IP**            	| 35.156.161.50                                                 	|
 | **SSH port**             	| 2200                                                          	|
 | **Item Catalog app URL** 	| https://ec2-35-156-161-50.eu-central-1.compute.amazonaws.com/ 	|
 
-## Set up new Ubuntu Server instance on Amazon Lightsail
+## Basic server setup
+### Set up new Ubuntu Server instance on Amazon Lightsail
 1. Log in on AWS ([create an account](https://aws.amazon.com/resources/create-account/) if needed)
 2. Click **Create instance** button on the home page
 3. Select the **Linux/Unix** platform and choose **OS Only** with **Ubuntu** as blueprint
@@ -19,7 +48,7 @@ The server details and setup/configuration steps taken are listed below.
 5. Name your instance
 6. Click **Create** button and wait for the instance to start up
 
-## SSH into the server
+### SSH into the server
 If your browser supports it you can connect using Amazon's browser-based ssh client by clicking the **'Connect using SSH'** button.  
 Alternatively follow the steps below in order to SSH into the server from your local machine.
 1. Download your private key from the [**'SSH keys'** tab on the account page](https://lightsail.aws.amazon.com/ls/webapp/account/keys) on Amazon Lightsail.  
@@ -40,7 +69,7 @@ Alternatively follow the steps below in order to SSH into the server from your l
      ```
 
 
-## Update all installed packages
+### Update all installed packages
 ```console
 $ sudo apt-get update
 $ sudo apt-get upgrade
@@ -48,14 +77,18 @@ $ sudo apt-get dist-upgrade
 ```
 If the message `*** System restart required ***` appears, reboot the server using `sudo reboot`.
 
+### Configure the local timezone to UTC
+```console
+$ sudo dpkg-reconfigure tzdata
+```
+Choose **None of the above** followed by **UTC**.
 
-##  Create an instance snapshot
-**Suggestion**:  
+### Suggestion: create an instance snapshot
 [Create an instance snapshot](https://lightsail.aws.amazon.com/ls/docs/en/articles/lightsail-how-to-create-a-snapshot-of-your-instance) before making changes on SSH and firewall configuration.  
 This ensures that the instance doesn't need to be set up again from scratch when something goes wrong.
 
-
-##  Change the SSH port from 22 to 2200 and disable remote root login
+## Security configuration
+###  Change the SSH port from 22 to 2200 and disable remote root login
 1. Open the configuration file.
 2. Change the port number from **22** to **2200**.
 3. Set `PermitRootLogin` to `no`.
@@ -73,7 +106,7 @@ $ sudo service ssh restart
 $ ssh -i ~/.ssh/lightsail_server.rsa ubuntu@35.156.161.50 -p 2200
 ```
 
-## Firewall configuration
+###  Firewall configuration
 1. Make sure ufw firewall is disabled
 2. Deny all incoming connections by default
 3. Accept all outgoing connections be default
@@ -99,8 +132,10 @@ $ sudo ufw enable
 $ sudo ufw status
 ```
 
-## Create new user **grader** with sudo access
-1. Create new user account named grader
+
+## Adding a user
+### Create new user **'grader'** with sudo access
+1. Create new user account named 'grader'
 2. Give sudo access by creating the file `/etc/sudoers.d/grader` containing the text `grader ALL=(ALL) NOPASSWD:ALL`.
 ```console
 $ sudo adduser grader
@@ -109,7 +144,7 @@ $ sudo nano /etc/sudoers.d/grader
 grader ALL=(ALL) NOPASSWD:ALL
 ```
 
-## Set up SSH login with keys for grader user
+### Set up SSH login with keys for grader user
 * On your local machine
     * Create an SSH key pair for the grader user in the `~/.ssh` folder.  
       Read its content to and copy it to clipboard.
@@ -141,14 +176,9 @@ Verify grader login:
 $ ssh -i ~/.ssh/grader_key -p 2200 grader@35.156.161.50
 ```
 
-## Configure the local timezone to UTC
-```console
-$ sudo dpkg-reconfigure tzdata
-```
-Choose **None of the above** followed by **UTC**.
 
-
-## Apache and mod_wsgi installation
+## Set up database and app dependencies
+### Apache and mod_wsgi installation
 ```console
 $ sudo apt-get install apache2
 $ sudo apt-get install libapache2-mod-wsgi python-dev
@@ -158,7 +188,7 @@ $ sudo service apache2 restart
 Open http://35.156.161.50/ in a web browser.  
 An **Apache2 Ubuntu Default Page** should open if the Apache installation was succesful.
 
-## PostgreSQL installation
+### PostgreSQL installation
 ```console
 $ sudo apt-get install postgresql postgresql-contrib
 ```
@@ -167,7 +197,7 @@ Make sure remote connections are being blocked.
 $ sudo nano /etc/postgresql/9.5/main/pg_hba.conf
 ```
 
-## PostgreSQL configuration: catalog user and database
+### PostgreSQL configuration: catalog user and database
 ```console
 $ sudo su - postgres
 $ psql
@@ -182,7 +212,7 @@ $ psql
 $ exit
 ```
 
-## Set up Linux user for database access
+### Set up Linux user for database access
 ```console
 $ sudo adduser catalog
 $ sudo visudo
@@ -196,7 +226,7 @@ $ exit
 ```
 
 
-## Git Installation and Item Catalog setup
+### Git Installation and Item Catalog setup
 ```console
 $ sudo apt-get install git
 $ sudo mkdir /var/www/catalog
@@ -212,7 +242,7 @@ Save and exit the file.
 Change `application` into `__init__` in `create_sample_catalog.py`.
 
 
-## Installation of Flask, SQLAlchemy and other dependencies
+###Installation of Flask, SQLAlchemy and other dependencies
 ```console
 $ sudo apt-get install python-pip
 $ sudo pip install httplib2
@@ -224,7 +254,7 @@ $ sudo apt-get install libpq-dev
 $ sudo pip install psycopg2
 ```
 
-## Setup and enble virtual host
+### Setup and enble virtual host
 ```console
 $ sudo touch /etc/apache2/sites-available/catalog.conf
 $ sudo nano /etc/apache2/sites-available/catalog.conf
@@ -250,7 +280,7 @@ $ sudo a2ensite catalog
 $ sudo service apache2 reload
 ```
 
-## WSGI Configuration
+### WSGI Configuration
 ```console
 $ sudo touch /var/www/catalog/catalog.wsgi
 $ sudo nano /var/www/catalog/catalog.wsgi
@@ -267,24 +297,24 @@ Save and exit file.
 $ sudo service apache2 reload
 ```
 
-## Disable default Apache startpage and enable the Itme Catalog
+### Disable default Apache startpage and enable the Itme Catalog
 ```console
 $ sudo a2dissite 000-default.conf
 $ sudo a2ensite catalog.conf
 $ sudo service apache2 reload
 ```
 
-## Edit the database path
+### Edit the database path
 Replace all `engine = create_engine` lines in `__init__.py` and `database_setup.py` with  
 `engine = create_engine('postgresql://catalog:[database_password]@localhost/catalog')`
 
-## Initialize database
+### Initialize database
 ```console
 $ sudo python create_sample_catalog.py
 $ sudo service apache2 reload
 ```
 
-## SSL Setup
+### SSL Setup
 Optionally, SSL can be enabled on the server by following the [excellent DigitalOcean guide](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04).
 
 
